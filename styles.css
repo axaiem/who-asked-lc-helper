@@ -1,0 +1,43 @@
+/* Problem info container */
+.lc-helper-container {
+    border: 1px solid #ccc;
+    padding: 12px;
+    margin: 10px 0;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    font-size: 14px;
+    max-width: 600px;
+}
+
+/* Company list */
+.lc-helper-companies {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0 0 0;
+}
+
+/* Individual company entry */
+.lc-helper-companies li {
+    margin-bottom: 4px;
+}
+
+/* Colored dot for last asked */
+.lc-helper-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* Color legend at the top */
+.lc-helper-legend {
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.lc-helper-legend span {
+    margin-right: 12px;
+}
+
