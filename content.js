@@ -40,6 +40,8 @@ function waitForTitle(callback) {
 }
 
 // --- Step 3: Display problem info ---
+// --- Step 3: Display problem info ---
+// --- Step 3: Display problem info ---
 function displayProblemInfo(problemData, titleElement) {
   const lastAskedColors = {
     'This Month': '#58e34b',  // dark green
@@ -49,46 +51,59 @@ function displayProblemInfo(problemData, titleElement) {
     'All Time': '#808080'     // grey
   };
 
+  // Order for sorting by recency
+  const recencyOrder = {
+    'This Month': 1,
+    '< 3 Months': 2,
+    '< 6 Months': 3,
+    '> 6 Months': 4,
+    'All Time': 5
+  };
+
+  // Sort companies by recency
+  const sortedCompanies = Object.entries(problemData.companies).sort((a, b) => {
+    const aOrder = recencyOrder[a[1].last_asked] ?? 6;
+    const bOrder = recencyOrder[b[1].last_asked] ?? 6;
+    return aOrder - bOrder;
+  });
+
   // Create container
   const container = document.createElement('div');
   container.className = 'lc-helper-container';
 
-  // Legend
-  container.innerHTML = `
-    <div class="lc-helper-legend">
-      <span><span class="lc-helper-dot" style="background:#58e34b"></span> < 3 Month</span>
-      <span><span class="lc-helper-dot" style="background:#ffd700"></span> < 1 Year</span>
-      <span><span class="lc-helper-dot" style="background:#ff8c00"></span> > 1 Year</span>
-      <span><span class="lc-helper-dot" style="background:#808080"></span> All Time</span>
-    </div>
-  `;
-
-  // Companies sorted by relative frequency descending
-  const sortedCompanies = Object.entries(problemData.companies)
-                              .sort(
-                                  (a, b) => (b[1].relative_frequency ?? 0) -
-                                      (a[1].relative_frequency ?? 0));
-
+  // Create horizontal company list
   const ul = document.createElement('ul');
   ul.className = 'lc-helper-companies';
 
   sortedCompanies.forEach(([company, info]) => {
     const li = document.createElement('li');
     li.className = 'lc-helper-company';
+
     const color = lastAskedColors[info.last_asked] ?? '#808080';
-    li.innerHTML = `
-      <span class="lc-helper-dot" style="background:${color}"></span>
-      ${company} (${info.relative_frequency ?? 'N/A'})
-    `;
+
+    // Dot + company name
+    li.innerHTML = `<span class="lc-helper-dot" style="background:${
+        color}"></span>${company}`;
+
+    // Custom tooltip element
+    const tooltip = document.createElement('span');
+    tooltip.className = 'lc-helper-tooltip';
+    tooltip.textContent =
+        `Last Asked: ${info.last_asked ?? 'N/A'}, Relative Frequency: ${
+            info.relative_frequency ?? 'N/A'}`;
+    li.appendChild(tooltip);
+
+    // Show/hide on hover
+    li.addEventListener('mouseenter', () => tooltip.style.opacity = 1);
+    li.addEventListener('mouseleave', () => tooltip.style.opacity = 0);
+
     ul.appendChild(li);
   });
 
+
+
   container.appendChild(ul);
 
-  // Insert below the title in the same main content area
-  const mainContainer =
-      titleElement.closest(
-          'div.question-content, div.question-content__JH8Y') ||
-      titleElement.parentElement;
-  mainContainer.insertAdjacentElement('afterend', container);
+  // Insert next to the title (current working position)
+  titleElement.parentElement.appendChild(container);
 }

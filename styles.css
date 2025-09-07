@@ -10,30 +10,21 @@
     box-sizing: border-box;
 }
 
-/* Legend */
-.lc-helper-legend {
-    margin-bottom: 6px;
-    font-size: 13px;
-}
-
-.lc-helper-legend span {
-    margin-right: 12px;
-}
-
 /* Company list as horizontal flex */
 .lc-helper-companies {
     list-style: none;
-    padding-left: 0;
+    padding: 0;
     margin: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    max-height: 200px; /* scroll if too tall */
-    overflow-y: auto;
+    max-height: 200px;
+    overflow-y: auto; /* vertical scroll */
+    overflow-x: visible; /* allow tooltips to escape */
 }
 
-/* Individual company badges */
 .lc-helper-company {
+    position: relative; /* necessary for tooltip positioning */
     display: flex;
     align-items: center;
     padding: 4px 8px;
@@ -41,8 +32,28 @@
     border-radius: 4px;
     background: #fff;
     border: 1px solid #ddd;
-    flex: 0 1 auto; /* shrinkable but width fits content */
+    flex: 0 1 auto;
+    cursor: default;
 }
+
+.lc-helper-tooltip {
+    position: absolute;
+    bottom: 125%; /* above the badge */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+
 
 /* Dot */
 .lc-helper-dot {
