@@ -1,25 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Who Asked LC Helper",
-  "version": "1.0.0",
-  "description": "LeetCode helper with company tags and problem information",
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "version": "1.0",
+  "description": "Show which companies ask a given LeetCode problem.",
+  "permissions": [],
   "content_scripts": [
     {
-      "matches": ["*://leetcode.com/*"],
+      "matches": ["https://leetcode.com/problems/*"],
       "js": ["content.js"]
     }
   ],
-  "icons": {
-    "128": "icons/icon128.png"
-  },
   "web_accessible_resources": [
     {
       "resources": ["data/problems.json"],
-      "matches": ["*://leetcode.com/*"]
+      "matches": ["https://leetcode.com/*"]
     }
   ]
 }

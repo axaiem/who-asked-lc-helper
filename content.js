@@ -1,82 +1,81 @@
-// Content script for LeetCode helper extension
-console.log('Who Asked LC Helper loaded!');
+// content.js
 
-// Load problems data
-let problemsData = null;
-
-// Fetch problems data
-async function loadProblemsData() {
-  try {
-    const response = await fetch(chrome.runtime.getURL('data/problems.json'));
-    problemsData = await response.json();
-    console.log('Problems data loaded:', problemsData);
-  } catch (error) {
-    console.error('Error loading problems data:', error);
-  }
+// --- Step 1: Extract the problem slug robustly ---
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+let slug = null;
+const problemsIndex = pathParts.indexOf('problems');
+if (problemsIndex !== -1 && pathParts.length > problemsIndex + 1) {
+  slug = pathParts[problemsIndex + 1];
 }
 
-// Initialize the extension
-async function init() {
-  await loadProblemsData();
+function waitForTitle(callback) {
+  const selector = 'div[data-cy="question-title"], div.text-title-large';
+  const titleElement = document.querySelector(selector);
 
-  // Add company tags and additional info to problem pages
-  if (window.location.pathname.includes('/problems/')) {
-    addCompanyTags();
+  if (titleElement) {
+    callback(titleElement);
+    return;
   }
-}
 
-// Add company tags to problem page
-function addCompanyTags() {
-  // Wait for the page to load
-  setTimeout(() => {
-    const problemTitle = document.querySelector('[data-cy="question-title"]');
-    if (problemTitle && problemsData) {
-      const problemName = problemTitle.textContent.trim();
-      const problem = problemsData.find(p => p.title === problemName);
-
-      if (problem) {
-        addCompanyInfo(problem);
-      }
+  const observer = new MutationObserver(() => {
+    const el = document.querySelector(selector);
+    if (el) {
+      observer.disconnect();
+      callback(el);
     }
-  }, 2000);
+  });
+
+  observer.observe(document.body, {childList: true, subtree: true});
 }
 
-// Add company information to the page
-function addCompanyInfo(problem) {
-  const container = document.querySelector('.question-content__JfgR');
-  if (container && problem.companies) {
-    const companyDiv = document.createElement('div');
-    companyDiv.style.cssText = `
-      margin: 20px 0;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #007bff;
-    `;
 
-    companyDiv.innerHTML = `
-      <h4 style="margin: 0 0 10px 0; color: #007bff;">Company Tags</h4>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        ${
-        problem.companies
-            .map(company => `<span style="
-            background: #007bff; 
-            color: white; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 12px;
-          ">${company}</span>`)
-            .join('')}
-      </div>
-    `;
-
-    container.appendChild(companyDiv);
-  }
-}
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
+if (!slug) {
+  console.warn('Could not extract problem slug from URL');
 } else {
-  init();
+  // --- Step 2: Load the problems.json from the extension ---
+  fetch(chrome.runtime.getURL('data/problems.json'))
+      .then(res => res.json())
+      .then(data => {
+        // Find the problem in JSON whose link includes the slug
+        const problemData = Object.values(data).find(
+            p => p.overall.link && p.overall.link.includes(slug));
+
+        if (problemData) {
+          waitForTitle(
+              (titleElement) => displayProblemInfo(problemData, titleElement));
+        }
+      })
+      .catch(err => console.error('Error loading problems.json:', err));
+}
+
+// --- Helper: Wait for the title element to exist ---
+function displayProblemInfo(problemData, titleElement) {
+  const container = document.createElement('div');
+  container.style = `
+        border: 1px solid #ccc;
+        padding: 12px;
+        margin: 10px 0;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+        font-size: 14px;
+    `;
+
+  // Sort companies by relative_frequency descending
+  const sortedCompanies = Object.entries(problemData.companies).sort((a, b) => {
+    const freqA = a[1].relative_frequency ?? 0;
+    const freqB = b[1].relative_frequency ?? 0;
+    return freqB - freqA;
+  });
+
+  const companiesStr = sortedCompanies
+                           .map(([company, info]) => {
+                             const lastAsked = info.last_asked ?? 'N/A';
+                             const relFreq = info.relative_frequency ?? 'N/A';
+                             return `${company} (${lastAsked}, ${relFreq})`;
+                           })
+                           .join('<br>');
+
+  container.innerHTML = `<strong>Companies:</strong><br>${companiesStr}`;
+
+  titleElement.insertAdjacentElement('afterend', container);
 }
