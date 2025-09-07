@@ -43,9 +43,9 @@ function waitForTitle(callback) {
 function displayProblemInfo(problemData, titleElement) {
   const lastAskedColors = {
     'This Month': '#58e34b',  // dark green
-    '< 3 Months': '#58e34b',  // dark green (merged with < 6 Months)
+    '< 3 Months': '#58e34b',  // dark green (merged)
     '< 6 Months': '#ffd700',  // yellow
-    '> 6 Months': '#ffd700',  // orange
+    '> 6 Months': '#ff8c00',  // orange
     'All Time': '#808080'     // grey
   };
 
@@ -55,12 +55,13 @@ function displayProblemInfo(problemData, titleElement) {
 
   // Legend
   container.innerHTML = `
-        <div class="lc-helper-legend">
-            <span><span class="lc-helper-dot" style="background:#58e34b"></span> < 3 Month</span>
-            <span><span class="lc-helper-dot" style="background:#ffd700"></span> < 1 Year</span>
-            <span><span class="lc-helper-dot" style="background:#808080"></span> All Time</span>
-        </div>
-    `;
+    <div class="lc-helper-legend">
+      <span><span class="lc-helper-dot" style="background:#58e34b"></span> < 3 Month</span>
+      <span><span class="lc-helper-dot" style="background:#ffd700"></span> < 1 Year</span>
+      <span><span class="lc-helper-dot" style="background:#ff8c00"></span> > 1 Year</span>
+      <span><span class="lc-helper-dot" style="background:#808080"></span> All Time</span>
+    </div>
+  `;
 
   // Companies sorted by relative frequency descending
   const sortedCompanies = Object.entries(problemData.companies)
@@ -73,15 +74,21 @@ function displayProblemInfo(problemData, titleElement) {
 
   sortedCompanies.forEach(([company, info]) => {
     const li = document.createElement('li');
+    li.className = 'lc-helper-company';
     const color = lastAskedColors[info.last_asked] ?? '#808080';
-    li.innerHTML = `<span class="lc-helper-dot" style="background:${
-        color}"></span> ${company} (${info.last_asked ?? 'N/A'}, ${
-        info.relative_frequency ?? 'N/A'})`;
+    li.innerHTML = `
+      <span class="lc-helper-dot" style="background:${color}"></span>
+      ${company} (${info.relative_frequency ?? 'N/A'})
+    `;
     ul.appendChild(li);
   });
 
   container.appendChild(ul);
 
-  // Insert after title
-  titleElement.insertAdjacentElement('afterend', container);
+  // Insert below the title in the same main content area
+  const mainContainer =
+      titleElement.closest(
+          'div.question-content, div.question-content__JH8Y') ||
+      titleElement.parentElement;
+  mainContainer.insertAdjacentElement('afterend', container);
 }
