@@ -11,11 +11,11 @@ OUTPUT_FILE = Path(__file__).parent.parent / "data/problems.json"
 
 # Map CSV file names to friendly last_asked labels
 FILE_NAME_TO_LAST_ASKED = {
-    "1. Thirty Days.csv": "this_month",
-    "2. Three Months.csv": "< 3_months",
-    "3. Six Months.csv": "< 6_months",
-    "4. More Than Six Months.csv": "> 6_months",
-    "5. All.csv": "all_time"
+    "1. Thirty Days.csv": "This Month",
+    "2. Three Months.csv": "< 3 Months",
+    "3. Six Months.csv": "< 6 Months",
+    "4. More Than Six Months.csv": "> 6 Months",
+    "5. All.csv": "All Time"
 }
 
 def get_priority(file_name):

@@ -60,22 +60,44 @@ function displayProblemInfo(problemData, titleElement) {
         font-size: 14px;
     `;
 
-  // Sort companies by relative_frequency descending
-  const sortedCompanies = Object.entries(problemData.companies).sort((a, b) => {
-    const freqA = a[1].relative_frequency ?? 0;
-    const freqB = b[1].relative_frequency ?? 0;
-    return freqB - freqA;
-  });
+  const legend = `
+    <div style="margin-bottom: 8px;">
+      <strong>Last Asked:</strong>
+      <span style="color:#58e34b;">● &lt; 3 Months</span>
+      <span style="color:#ffd700;">● &lt; 1 year</span>
+      <span style="color:#808080;">● All Time</span>
+    </div>
+  `;
+  // Map last asked categories to colors
+  const lastAskedColors = {
+    'This Month': '#58e34b',  // dark green
+    '< 3 Months': '#58e34b',  // yellow (merged with < 6 Months)
+    '< 6 Months': '#ffd700',  // yellow
+    '> 6 Months': '#ff8c00',  // orange
+    'All Time': '#808080'     // grey
+  };
 
-  const companiesStr = sortedCompanies
-                           .map(([company, info]) => {
-                             const lastAsked = info.last_asked ?? 'N/A';
-                             const relFreq = info.relative_frequency ?? 'N/A';
-                             return `${company} (${lastAsked}, ${relFreq})`;
-                           })
-                           .join('<br>');
+  // Sort companies by relative frequency descending
+  const sortedCompanies = Object.entries(problemData.companies)
+                              .sort(
+                                  (a, b) => (b[1].relative_frequency ?? 0) -
+                                      (a[1].relative_frequency ?? 0));
 
-  container.innerHTML = `<strong>Companies:</strong><br>${companiesStr}`;
+  // Build company info HTML
+  const companies =
+      Object.entries(problemData.companies)
+          .sort(
+              (a, b) => (b[1].relative_frequency || 0) -
+                  (a[1].relative_frequency || 0))
+          .map(([company, info]) => {
+            const color = lastAskedColors[info.last_asked] || '#000';
+            return `<span><span style="color:${color};">●</span> ${company} (${
+                info.relative_frequency})</span>`;
+          })
+          .join('<br>');
 
+  container.innerHTML = legend + companies;
+
+  // Insert after title
   titleElement.insertAdjacentElement('afterend', container);
 }
