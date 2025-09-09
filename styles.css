@@ -1,4 +1,4 @@
-/* Floating container */
+/* Floating container
 .lc-helper-floating {
     position: fixed;
     left: 20px;
@@ -7,23 +7,20 @@
     z-index: 9999;
     font-size: 14px;
     transition: all 0.2s ease;
+} */
+/* Floating container */
+.lc-helper-floating {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    z-index: 9999;
+    font-size: 14px;
+    transition: all 0.2s ease;
 }
 
 /* Collapsed -> only show button */
 .lc-helper-floating.collapsed .lc-helper-content {
     display: none;
-}
-
-/* Expandable panel */
-.lc-helper-content {
-    width: 260px;
-    max-height: 300px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
 }
 
 /* Floating button */
@@ -36,9 +33,31 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    cursor: grab;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     font-size: 20px;
+}
+
+/* Expanded panel drops below button */
+.lc-helper-content {
+    position: absolute;
+    top: 50px; /* directly below button */
+    left: 0;
+    width: 260px;
+    max-height: 300px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    animation: dropDown 0.2s ease;
+}
+
+/* Drop animation */
+@keyframes dropDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Header */
@@ -61,17 +80,27 @@
     flex: 1;
 }
 
-/* Company badge */
+/* Individual company badges */
 .lc-helper-company {
     display: flex;
     align-items: center;
-    padding: 3px 6px;
-    font-size: 12px;
-    border-radius: 4px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: 13px;
+    border-radius: 6px;
+    background: #fff;
+    flex: 0 1 auto;
     cursor: default;
-}
+    min-width: 40px;
+    height: 40px;
+  }
+  
+  /* Borders for recency */
+  .lc-border-month    { border: 2px solid green; }
+  .lc-border-3months  { border: 2px solid green; }
+  .lc-border-6months  { border: 2px double orange; }
+  .lc-border-gt6      { border: 2px double orange; }
+  .lc-border-alltime  { border: 2px dotted black; }
 
 /* Dot */
 .lc-helper-dot {
@@ -81,3 +110,7 @@
     border-radius: 50%;
     margin-right: 5px;
 }
+.lc-helper-company img {
+    display: block;
+    margin: auto;
+  }

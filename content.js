@@ -40,8 +40,6 @@ function waitForTitle(callback) {
 }
 
 // --- Step 3: Display problem info ---
-// --- Step 3: Display problem info ---
-// --- Step 3: Display problem info ---
 function displayProblemInfo(problemData) {
   const lastAskedColors = {
     'This Month': '#58e34b',
@@ -69,19 +67,19 @@ function displayProblemInfo(problemData) {
   const container = document.createElement('div');
   container.className = 'lc-helper-floating collapsed';
 
-  // Button (visible in collapsed state)
+  // Button
   const toggleBtn = document.createElement('div');
   toggleBtn.className = 'lc-helper-button';
-  toggleBtn.textContent = '🏢';  // small building icon
+  toggleBtn.textContent = '🏢';
   container.appendChild(toggleBtn);
 
-  // Expandable content
+  // Expandable panel
   const content = document.createElement('div');
   content.className = 'lc-helper-content';
 
   const header = document.createElement('div');
   header.className = 'lc-helper-header';
-  header.innerHTML = `<span>Asked By Companies</span>`;
+  header.textContent = 'Asked By Companies';
 
   const ul = document.createElement('ul');
   ul.className = 'lc-helper-companies';
@@ -89,21 +87,71 @@ function displayProblemInfo(problemData) {
   sortedCompanies.forEach(([company, info]) => {
     const li = document.createElement('li');
     li.className = 'lc-helper-company';
-    const color = lastAskedColors[info.last_asked] ?? '#808080';
-    li.innerHTML = `<span class="lc-helper-dot" style="background:${
-        color}"></span>${company}`;
+
+    // Pick border style
+    const borderClass = {
+      'This Month': 'lc-border-month',
+      '< 3 Months': 'lc-border-3months',
+      '< 6 Months': 'lc-border-6months',
+      '> 6 Months': 'lc-border-gt6',
+      'All Time': 'lc-border-alltime'
+    }[info.last_asked] ||
+        'lc-border-alltime';
+
+    li.classList.add(borderClass);
+
+    // Try to use company icon
+    const img = document.createElement('img');
+    const fileName = company.toLowerCase().replace(/\s+/g, '') + '.png';
+    img.src = chrome.runtime.getURL('icons/' + fileName);
+    img.alt = company;
+    img.style.width = '20px';
+    img.style.height = '20px';
+    img.style.objectFit = 'contain';
+
+    // If icon fails to load → show text fallback
+    img.onerror = () => {
+      li.textContent = company;
+    };
+
+    li.appendChild(img);
+
+    // Tooltip
     li.title = `Last Asked: ${info.last_asked ?? 'N/A'}\nRelative Frequency: ${
         info.relative_frequency ?? 'N/A'}`;
+
     ul.appendChild(li);
   });
+
 
   content.appendChild(header);
   content.appendChild(ul);
   container.appendChild(content);
   document.body.appendChild(container);
 
-  // Toggle open/close
+  // Toggle expand/collapse
   toggleBtn.addEventListener('click', () => {
     container.classList.toggle('collapsed');
+  });
+
+  // Make button draggable
+  let isDragging = false, offsetX = 0, offsetY = 0;
+
+  toggleBtn.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.clientX - container.getBoundingClientRect().left;
+    offsetY = e.clientY - container.getBoundingClientRect().top;
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    container.style.left = `${e.clientX - offsetX}px`;
+    container.style.top = `${e.clientY - offsetY}px`;
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.userSelect = '';
   });
 }
