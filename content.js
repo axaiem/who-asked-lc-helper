@@ -42,16 +42,15 @@ function waitForTitle(callback) {
 // --- Step 3: Display problem info ---
 // --- Step 3: Display problem info ---
 // --- Step 3: Display problem info ---
-function displayProblemInfo(problemData, titleElement) {
+function displayProblemInfo(problemData) {
   const lastAskedColors = {
-    'This Month': '#58e34b',  // dark green
-    '< 3 Months': '#58e34b',  // dark green (merged)
-    '< 6 Months': '#ffd700',  // yellow
-    '> 6 Months': '#ff8c00',  // orange
-    'All Time': '#808080'     // grey
+    'This Month': '#58e34b',
+    '< 3 Months': '#58e34b',
+    '< 6 Months': '#ffd700',
+    '> 6 Months': '#ff8c00',
+    'All Time': '#808080'
   };
 
-  // Order for sorting by recency
   const recencyOrder = {
     'This Month': 1,
     '< 3 Months': 2,
@@ -60,50 +59,51 @@ function displayProblemInfo(problemData, titleElement) {
     'All Time': 5
   };
 
-  // Sort companies by recency
   const sortedCompanies = Object.entries(problemData.companies).sort((a, b) => {
     const aOrder = recencyOrder[a[1].last_asked] ?? 6;
     const bOrder = recencyOrder[b[1].last_asked] ?? 6;
     return aOrder - bOrder;
   });
 
-  // Create container
+  // Container
   const container = document.createElement('div');
-  container.className = 'lc-helper-container';
+  container.className = 'lc-helper-floating';
 
-  // Create horizontal company list
+  // Header with toggle button
+  const header = document.createElement('div');
+  header.className = 'lc-helper-header';
+  header.innerHTML =
+      `<span>Asked By Companies</span> <button class="lc-helper-toggle">−</button>`;
+
+  // Content area
+  const content = document.createElement('div');
+  content.className = 'lc-helper-content';
+
   const ul = document.createElement('ul');
   ul.className = 'lc-helper-companies';
 
   sortedCompanies.forEach(([company, info]) => {
     const li = document.createElement('li');
     li.className = 'lc-helper-company';
-
     const color = lastAskedColors[info.last_asked] ?? '#808080';
 
-    // Dot + company name
     li.innerHTML = `<span class="lc-helper-dot" style="background:${
         color}"></span>${company}`;
-
-    // Custom tooltip element
-    const tooltip = document.createElement('span');
-    tooltip.className = 'lc-helper-tooltip';
-    tooltip.textContent =
-        `Last Asked: ${info.last_asked ?? 'N/A'}, Relative Frequency: ${
-            info.relative_frequency ?? 'N/A'}`;
-    li.appendChild(tooltip);
-
-    // Show/hide on hover
-    li.addEventListener('mouseenter', () => tooltip.style.opacity = 1);
-    li.addEventListener('mouseleave', () => tooltip.style.opacity = 0);
+    li.title = `Last Asked: ${info.last_asked ?? 'N/A'}\nRelative Frequency: ${
+        info.relative_frequency ?? 'N/A'}`;
 
     ul.appendChild(li);
   });
 
+  content.appendChild(ul);
+  container.appendChild(header);
+  container.appendChild(content);
+  document.body.appendChild(container);
 
-
-  container.appendChild(ul);
-
-  // Insert next to the title (current working position)
-  titleElement.parentElement.appendChild(container);
+  // Toggle button logic
+  const toggleBtn = header.querySelector('.lc-helper-toggle');
+  toggleBtn.addEventListener('click', () => {
+    const isCollapsed = container.classList.toggle('collapsed');
+    toggleBtn.textContent = isCollapsed ? '+' : '−';
+  });
 }
