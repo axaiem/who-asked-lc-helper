@@ -18,8 +18,7 @@ fetch(chrome.runtime.getURL('data/problems.json'))
     .then(data => {
       const problemData = Object.values(data).find(
           p => p.overall.link && p.overall.link.includes(slug));
-      if (problemData)
-        waitForTitle(titleEl => displayProblemInfo(problemData, titleEl));
+      if (problemData) waitForTitle(() => displayProblemInfo(problemData));
     })
     .catch(err => console.error('Error loading problems.json:', err));
 
@@ -41,14 +40,6 @@ function waitForTitle(callback) {
 
 // --- Step 3: Display problem info ---
 function displayProblemInfo(problemData) {
-  const lastAskedColors = {
-    'This Month': '#58e34b',
-    '< 3 Months': '#58e34b',
-    '< 6 Months': '#ffd700',
-    '> 6 Months': '#ff8c00',
-    'All Time': '#808080'
-  };
-
   const recencyOrder = {
     'This Month': 1,
     '< 3 Months': 2,
@@ -77,10 +68,36 @@ function displayProblemInfo(problemData) {
   const content = document.createElement('div');
   content.className = 'lc-helper-content';
 
-  const header = document.createElement('div');
-  header.className = 'lc-helper-header';
-  header.textContent = 'Asked By Companies';
+  // Info icon + legend
+  const infoWrapper = document.createElement('div');
+  infoWrapper.className = 'lc-helper-info-wrapper';
 
+  const infoBtn = document.createElement('span');
+  infoBtn.className = 'lc-helper-info-btn';
+  infoBtn.textContent = 'ℹ';
+
+  const legend = document.createElement('div');
+  legend.className = 'lc-helper-legend';
+  legend.innerHTML = `
+    <div class="lc-border-month sample"> < 3 Months ago</div>
+    <div class="lc-border-6months"> < 1 Year ago</div>
+    <div class="lc-border-alltime sample"> > 1 year ago</div>
+  `;
+  infoBtn.addEventListener('click', () => {
+    legend.classList.toggle('show');
+  });
+
+  infoBtn.addEventListener('mouseenter', () => legend.classList.add('show'));
+  infoBtn.addEventListener('mouseleave', () => legend.classList.remove('show'));
+  infoBtn.addEventListener('click', () => {
+    legend.classList.toggle('show');
+  });
+
+  infoWrapper.appendChild(infoBtn);
+  infoWrapper.appendChild(legend);
+  content.appendChild(infoWrapper);
+
+  // Companies list
   const ul = document.createElement('ul');
   ul.className = 'lc-helper-companies';
 
@@ -88,7 +105,6 @@ function displayProblemInfo(problemData) {
     const li = document.createElement('li');
     li.className = 'lc-helper-company';
 
-    // Pick border style
     const borderClass = {
       'This Month': 'lc-border-month',
       '< 3 Months': 'lc-border-3months',
@@ -109,7 +125,6 @@ function displayProblemInfo(problemData) {
     img.style.height = '20px';
     img.style.objectFit = 'contain';
 
-    // If icon fails to load → show text fallback
     img.onerror = () => {
       li.textContent = company;
     };
@@ -123,8 +138,6 @@ function displayProblemInfo(problemData) {
     ul.appendChild(li);
   });
 
-
-  content.appendChild(header);
   content.appendChild(ul);
   container.appendChild(content);
   document.body.appendChild(container);
@@ -151,6 +164,20 @@ function displayProblemInfo(problemData) {
   });
 
   document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.userSelect = '';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target) && e.target !== toggleBtn) {
+      container.classList.add('collapsed');
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      container.classList.add('collapsed');  // collapse after move
+    }
     isDragging = false;
     document.body.style.userSelect = '';
   });
