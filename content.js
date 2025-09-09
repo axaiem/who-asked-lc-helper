@@ -65,19 +65,23 @@ function displayProblemInfo(problemData) {
     return aOrder - bOrder;
   });
 
-  // Container
+  // Floating container
   const container = document.createElement('div');
-  container.className = 'lc-helper-floating';
+  container.className = 'lc-helper-floating collapsed';
 
-  // Header with toggle button
-  const header = document.createElement('div');
-  header.className = 'lc-helper-header';
-  header.innerHTML =
-      `<span>Asked By Companies</span> <button class="lc-helper-toggle">−</button>`;
+  // Button (visible in collapsed state)
+  const toggleBtn = document.createElement('div');
+  toggleBtn.className = 'lc-helper-button';
+  toggleBtn.textContent = '🏢';  // small building icon
+  container.appendChild(toggleBtn);
 
-  // Content area
+  // Expandable content
   const content = document.createElement('div');
   content.className = 'lc-helper-content';
+
+  const header = document.createElement('div');
+  header.className = 'lc-helper-header';
+  header.innerHTML = `<span>Asked By Companies</span>`;
 
   const ul = document.createElement('ul');
   ul.className = 'lc-helper-companies';
@@ -86,24 +90,20 @@ function displayProblemInfo(problemData) {
     const li = document.createElement('li');
     li.className = 'lc-helper-company';
     const color = lastAskedColors[info.last_asked] ?? '#808080';
-
     li.innerHTML = `<span class="lc-helper-dot" style="background:${
         color}"></span>${company}`;
     li.title = `Last Asked: ${info.last_asked ?? 'N/A'}\nRelative Frequency: ${
         info.relative_frequency ?? 'N/A'}`;
-
     ul.appendChild(li);
   });
 
+  content.appendChild(header);
   content.appendChild(ul);
-  container.appendChild(header);
   container.appendChild(content);
   document.body.appendChild(container);
 
-  // Toggle button logic
-  const toggleBtn = header.querySelector('.lc-helper-toggle');
+  // Toggle open/close
   toggleBtn.addEventListener('click', () => {
-    const isCollapsed = container.classList.toggle('collapsed');
-    toggleBtn.textContent = isCollapsed ? '+' : '−';
+    container.classList.toggle('collapsed');
   });
 }
