@@ -191,3 +191,15 @@
   display: block;
 }
 
+.lc-helper-button img {
+  width: 100%;          /* icon fills 60% of button */
+  height: 100%;
+  object-fit: contain; /* keeps aspect ratio */
+  display: block;      /* remove inline spacing */
+  pointer-events: none; /* so drag/click is on button, not the img */
+}
+
+.lc-helper-button {
+  background: #fff; /* force white background */
+  border: 1px solid #ccc; /* optional: subtle border to keep visibility */
+}

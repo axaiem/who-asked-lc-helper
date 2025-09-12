@@ -61,8 +61,18 @@ function displayProblemInfo(problemData) {
   // Button
   const toggleBtn = document.createElement('div');
   toggleBtn.className = 'lc-helper-button';
-  toggleBtn.textContent = '🏢';
+
+  // Use an image instead of text
+  const img = document.createElement('img');
+  img.src = chrome.runtime.getURL('icons/icon24.png');
+  img.alt = 'Toggle';       // accessibility
+  img.style.width = '60%';  // scale image to fit nicely
+  img.style.height = '60%';
+  img.style.objectFit = 'contain';
+
+  toggleBtn.appendChild(img);
   container.appendChild(toggleBtn);
+
 
   // Expandable panel
   const content = document.createElement('div');
